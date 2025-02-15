@@ -1,0 +1,12 @@
+ladder:
+  outputs:
+    dev:
+      dbname: ladder
+      host: airflow
+      pass: airflow
+      port: 5432
+      schema: analytics
+      threads: 4
+      type: postgres
+      user: airflow
+  target: dev

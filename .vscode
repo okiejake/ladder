@@ -1,0 +1,9 @@
+{
+    "files.associations": {
+        "*.sql": "jinja-sql",
+        "*.yml": "jinja-yaml"
+    },
+    "dbt.enableNewLineagePanel": true,
+    "dbt.lineage.defaultExpansion": 3,
+    "dbt.perspectiveTheme": "Pro Dark"
+}

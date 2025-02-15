@@ -1,0 +1,67 @@
+services:
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  airflow-webserver:
+    image: apache/airflow
+    platform: linux/x86_64
+    depends_on:
+      - postgres
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/plugins:/opt/airflow/plugins
+    ports:
+      - "8080:8080"
+    command: webserver
+
+  airflow-scheduler:
+    image: apache/airflow
+    platform: linux/x86_64
+    depends_on:
+      - postgres
+      - airflow-webserver
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/plugins:/opt/airflow/plugins
+    command: scheduler
+
+  dbt:
+    image: ghcr.io/dbt-labs/dbt-postgres
+    platform: linux/x86_64
+    volumes:
+      - ./dbt:/usr/app
+    working_dir: /usr/app
+    environment:
+      DBT_PROFILES_DIR: /usr/app
+    entrypoint: ["dbt"]
+
+  dlthub:
+    image: python
+    volumes:
+      - ./dlthub:/usr/app
+    working_dir: /usr/app
+    command: ["python", "extract_load.py"]
+
+  cosmos:
+    image: python
+    volumes:
+      - ./cosmos:/usr/app
+    working_dir: /usr/app
+    command: ["python", "-m", "cosmos"]
+
+volumes:
+  postgres_data:
